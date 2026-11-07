@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "senior",
+  "instructions": ["AGENTS.md"],
+  "subagent_depth": 1,
+  "permission": {
+    "edit": "ask",
+    "bash": "ask",
+    "external_directory": {
+      // Add your local vault path here to avoid prompts, for example:
+      // "C:/path/to/your/vault/**": "allow",
+      "*": "ask"
+    }
+  }
+}

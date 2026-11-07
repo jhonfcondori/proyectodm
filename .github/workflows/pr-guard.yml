@@ -1,0 +1,53 @@
+name: PR Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  guard:
+    name: Base branch and revert plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate base branch
+        run: |
+          base="${{ github.event.pull_request.base.ref }}"
+          head="${{ github.event.pull_request.head.ref }}"
+          if [ "$base" != "dev" ] && ! { [ "$base" = "main" ] && [ "$head" = "dev" ]; }; then
+            echo "::error::PRs must target dev. Only dev -> main release PRs may target main."
+            exit 1
+          fi
+
+      - name: Fetch base branch
+        run: git fetch origin "${{ github.event.pull_request.base.ref }}"
+
+      - name: Require revert document for database changes
+        run: |
+          base="${{ github.event.pull_request.base.ref }}"
+          changed=$(git diff --name-only "origin/$base...HEAD")
+          echo "Changed files:"
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(prisma/(schema\.prisma|migrations/)|scripts/db-)'; then
+            doc="docs/revert/PR-${{ github.event.pull_request.number }}.md"
+            if [ ! -f "$doc" ]; then
+              echo "::error::Database change detected. Missing $doc. Run: npm run revert:prep -- --pr ${{ github.event.pull_request.number }} --branch <branch>"
+              exit 1
+            fi
+          fi
+
+      - name: Verify no private material is tracked
+        run: |
+          if git ls-files | grep -qE '^(DocMaterial/|vault/|respaldos/)|\.(db|sqlite|sqlite3)$'; then
+            echo "::error::Private material or database files are tracked. Remove them and update .gitignore."
+            git ls-files | grep -E '^(DocMaterial/|vault/|respaldos/)|\.(db|sqlite|sqlite3)$'
+            exit 1
+          fi

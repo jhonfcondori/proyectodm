@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "dev" ] || [ "$branch" = "main" ]; then
+  echo "Direct push to $branch is forbidden."
+  echo "Create a feature branch from dev, open a PR, and let CI validate it."
+  exit 1
+fi
