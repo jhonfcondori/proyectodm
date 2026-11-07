@@ -78,7 +78,7 @@ if (existsSync(outputPath) && !args.force) {
 const date = new Date().toISOString().slice(0, 10)
 const migrations = args.noDb ? 'None (no database change)' : args.migrations
 
-const output = template
+let output = template
   .replaceAll('<number>', pr)
   .replaceAll('<branch>', branch)
   .replaceAll('<feature_sha>', featureSha)
@@ -93,6 +93,13 @@ const output = template
   .replaceAll('<backup_path>', args.noDb ? 'n/a' : backupPath)
   .replaceAll('<flag_name>', 'None')
   .replaceAll('<free text>', 'None')
+
+if (args.noDb) {
+  output = output.replace(
+    /## Database revert\n\n```bash\n[\s\S]*?```\n\nIf there was no migration, skip the `prisma` commands\./,
+    '## Database revert\n\nNo database change. Nothing to restore.',
+  )
+}
 
 await mkdir(path.dirname(outputPath), { recursive: true })
 await writeFile(outputPath, output, 'utf8')
