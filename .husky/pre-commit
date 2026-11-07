@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+npm run privacy:check -- --staged
