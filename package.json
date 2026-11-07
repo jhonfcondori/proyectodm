@@ -1,0 +1,31 @@
+{
+  "name": "proyectodm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first D&D 5e assistant for Dungeon Masters: campaigns, wiki, combat tracker, generators, loot and Obsidian sync.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node -e \"console.log('Fase 1 pendiente: npm run dev')\"",
+    "build": "node -e \"console.log('Fase 1 pendiente: npm run build')\"",
+    "lint": "node -e \"console.log('Fase 1 pendiente: npm run lint')\"",
+    "typecheck": "node -e \"console.log('Fase 1 pendiente: npm run typecheck')\"",
+    "test": "node -e \"console.log('Fase 1 pendiente: npm run test')\"",
+    "db:backup": "node scripts/db-backup.mjs",
+    "db:restore": "node scripts/db-restore.mjs",
+    "revert:prep": "node scripts/revert-prep.mjs",
+    "privacy:check": "node scripts/privacy-check.mjs",
+    "pr:ready": "npm run lint && npm run typecheck && npm run test && npm run privacy:check",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}
