@@ -1,3 +1,5 @@
+import type { HealthResponse } from '@proyectodm/shared'
+
 export type BadgeStatus = 'ok' | 'degraded' | 'error' | 'loading'
 
 const styles: Record<BadgeStatus, string> = {
@@ -22,4 +24,22 @@ export function StatusBadge({ status, label }: StatusBadgeProps) {
       {label}
     </span>
   )
+}
+
+export interface HealthBadge {
+  status: BadgeStatus
+  label: string
+}
+
+// Single source of truth for the health pill shown in HealthCard and in the
+// app header badge.
+export function deriveHealthBadge(
+  health: HealthResponse | undefined,
+  isLoading: boolean,
+  error: Error | null,
+): HealthBadge {
+  if (error) return { status: 'error', label: 'Sin conexión' }
+  if (isLoading) return { status: 'loading', label: 'Comprobando' }
+  if (health?.status === 'ok') return { status: 'ok', label: 'Operativo' }
+  return { status: 'degraded', label: 'Degradado' }
 }

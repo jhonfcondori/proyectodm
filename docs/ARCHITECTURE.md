@@ -54,6 +54,35 @@ Rules enforced by lint (dependency-cruiser):
 - `packages/domain` imports no app or framework code.
 - `packages/vault` exposes `VaultAdapter`; the filesystem adapter is the default.
 
+Cross-module rule note: route-level code splitting (see Frontend) imports modules
+through their public `index.ts`, so the lazy boundaries respect the same rule.
+
+## Backend composition (dependency injection)
+
+The API is composed, not singleton-wired:
+
+- `createApp(deps)` in `apps/api/src/app.ts` receives its dependencies explicitly.
+  `deps.prisma` is **optional** (`PrismaClient`), so health-only tests can build
+  the app without a database.
+- Modules that need the database are mounted only when their dependency is
+  present: `/api/v1/health` is always mounted; `/api/v1/campaigns` is mounted
+  only when `deps.prisma !== undefined`. When the dependency is missing the
+  module is simply not registered (no route, no 500).
+- Repositories receive `PrismaClient` **by parameter** (first argument), never
+  the `db.ts` singleton, so tests can inject a client bound to a temporary
+  database. Services orchestrate repositories; routes wire `validate` +
+  `asyncHandler` and read the parsed input via `getValidated(response)`.
+- Backend module layout (all under `apps/api/src/modules/<module>/`):
+  `<module>.routes.ts` (router factory, takes deps), `<module>.service.ts`
+  (use cases, HTTP-agnostic apart from `HttpError`), `<module>.repo.ts`
+  (Prisma queries), `<module>.schema.ts` (module-local re-export of the
+  shared contracts so the module imports them through its own boundary),
+  `index.ts` (public API). Cross-cutting HTTP helpers live in
+  `apps/api/src/http/` (`errors.ts`, `handler.ts`). The `health` module
+  currently ships only `routes`/`service`; whether that is a permanent
+  exemption from the `repo`/`schema` convention is an open decision (see
+  `PENDIENTES.md`).
+
 ## Data ownership
 
 | Data | Source of truth |
@@ -74,6 +103,21 @@ The database mirrors vault content for search and structured state, but never si
 - Every schema change requires a backup before `npm run db:migrate`.
 - SQLite rollback is restore-from-backup. Prisma migrations are forward-only.
 - Destructive changes use expand/contract across separate PRs.
+
+### Decision: `Campaign.name` uniqueness is application-level, not a DB constraint
+
+`Campaign.name` has **no** `@@unique` constraint (see `apps/api/prisma/schema.prisma`
+and migration `20261108044135_f2_campaigns_status`, which only adds
+`Campaign.status` with default `ACTIVE` and the composite index
+`[status, updatedAt]`). Uniqueness is enforced in the service layer
+(`existsByName` → `409 CONFLICT`), with Prisma `P2002` mapped to `409` as a
+race safety net (`fromPrismaError`).
+
+Reason: this is a local, single-user app and the database holds user data. A
+DB unique index would have forced the migration to dedupe existing rows (a
+data-mutating `UPDATE`) or fail on install. Application-level uniqueness keeps
+migrations additive and never rewrites user data. Do not add `@@unique([name])`
+without a separate expand/contract plan.
 
 ## Obsidian integration
 
@@ -101,11 +145,64 @@ Frontmatter on exported notes includes a stable `dm_id`, `dm_type`, `campaign` a
 ## API
 
 - Base path: `/api/v1`.
-- Validation with Zod contracts from `packages/shared`.
-- Response envelope: `{ data, meta }` or `{ error: { code, message, details } }`.
-- `GET /health` is the exception: it returns the shared `HealthResponse` directly so monitoring can read it without unwrapping.
-- Pagination: `?page=&limit=`.
-- Error codes: 400, 404, 409, 422.
+- Validation with Zod contracts from `packages/shared`. The `validate`
+  middleware (`apps/api/src/http/handler.ts`) parses body/query/params and
+  stores the coerced values on `res.locals.validated` (Express 5 `req.query`
+  and `req.params` are getters, so the request is not mutated); handlers read
+  them via `getValidated(response)`. Calling `getValidated` without the
+  middleware is a technical 500.
+- Response envelope (uniform across routes):
+  - Success, single resource: `{ data }`.
+  - Success, paginated list: `{ data, meta }` where
+    `meta = { page, limit, total, totalPages }`.
+  - Error: `{ error: { code, message, details? } }` (`details` optional).
+- Success example: `201 { "data": { ...campaign } }`;
+  list example: `200 { "data": [...], "meta": { "page": 1, "limit": 20, "total": 3, "totalPages": 1 } }`;
+  error example: `409 { "error": { "code": "CONFLICT", "message": "A campaign with this name already exists" } }`.
+- Error codes and statuses (`ApiErrorCode` in `packages/shared/src/api.ts`):
+  - `400` `VALIDATION_ERROR` — Zod parse failure or malformed JSON body.
+  - `404` `NOT_FOUND` — missing resource; also the envelope returned for unknown routes.
+  - `409` `CONFLICT` — e.g. duplicate campaign name (`existsByName`, or a `P2002` race).
+  - `500` `INTERNAL_ERROR` — anything unexpected; internal details never leak.
+  - `INVALID_TRANSITION` and `VAULT_UNAVAILABLE` are reserved in the shared
+    `ApiErrorCodeSchema` but not emitted by any current route.
+- `fromPrismaError` (`apps/api/src/http/errors.ts`) maps known Prisma errors:
+  `P2002` → `409 CONFLICT`, `P2025` → `404 NOT_FOUND`. Detection is structural
+  (`error.code`), not `instanceof`.
+- `GET /api/v1/health` is the exception: it returns the shared
+  `HealthResponse` directly so monitoring can read it without unwrapping.
+- Pagination: `?page=&limit=` (coerced to integers; `page` ≥ 1,
+  `limit` 1..100; defaults `page=1`, `limit=20`), implemented in
+  `PageQuerySchema` and extended by list endpoints.
+
+## Frontend
+
+- React 19 + Vite + TypeScript + Tailwind 4, with TanStack Query for server
+  state. Entry: `apps/web/src/main.tsx` (`QueryClientProvider`) →
+  `apps/web/src/App.tsx`.
+- SPA router: `react-router` 7 in **library mode** (`BrowserRouter` +
+  `Routes` + `Route`). No data router, loaders, actions or SSR; plain
+  client-side routing.
+- Route-level code splitting: every page is a `React.lazy` import wrapped in
+  `Suspense` (`App.tsx`), so each route ships its own async chunk. Cross-module
+  lazy imports go through the module's public `index.ts`.
+- Layout: `AppLayout` is a layout route (`<Route element={<AppLayout />}>`)
+  rendering shared chrome with an `<Outlet />`; `/` redirects to `/campaigns`;
+  unknown paths render `NotFoundPage`.
+- UI primitives live in `apps/web/src/components/ui/` (`Badge`,
+  `ConfirmDialog`, `EmptyState`, `InlineError`, `PageHeader`, `Skeleton`).
+- Frontend module layout (`apps/web/src/modules/<module>/`): `api.ts`
+  (fetchers + Zod response parsing), `hooks.ts` (TanStack Query hooks),
+  `components/`, `pages/`, `index.ts` (public API). Campaigns also keep
+  pure helpers (`delete-confirmation.ts`, `form-diff.ts`) beside the components.
+- HTTP access goes through `apps/web/src/lib/api-client.ts`
+  (`requestJson`): it validates every response with a Zod schema and throws
+  `ApiClientError` (status + stable code) carrying the backend error envelope.
+  `apiErrorMessage` maps stable codes to Spanish UI copy; the API itself
+  returns English messages.
+- The production entry chunk is ~602 kB (Vite's >500 kB warning is
+  pre-existing); route-level chunks are split out, but the shared entry is not
+  yet tuned (`manualChunks` evaluation is tracked in `PENDIENTES.md`).
 
 ## Security and privacy
 

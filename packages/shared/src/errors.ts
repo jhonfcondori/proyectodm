@@ -1,8 +1,9 @@
 import { z } from 'zod'
+import { ApiErrorCodeSchema } from './api'
 
 export const ApiErrorSchema = z.object({
   error: z.object({
-    code: z.string().min(1),
+    code: ApiErrorCodeSchema,
     message: z.string().min(1),
     details: z.unknown().optional(),
   }),

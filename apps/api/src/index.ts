@@ -3,7 +3,7 @@ import { config } from './config'
 import { prisma, probeDatabase } from './db'
 
 const VERSION = process.env.npm_package_version ?? '0.1.0'
-const app = createApp({ version: VERSION, probeDatabase })
+const app = createApp({ version: VERSION, probeDatabase, prisma })
 
 const server = app.listen(config.PORT, () => {
   console.log(`ProyectoDM API listening on http://localhost:${config.PORT}`)
