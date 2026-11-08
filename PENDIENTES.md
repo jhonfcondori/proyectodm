@@ -7,7 +7,7 @@
 - [x] Fase 0 — Gobierno, repo, CI, backup/revert y equipo de agentes.
 - [x] Fase 0.5 — Fusión del vault local (fuera del repo).
 - [x] Fase 1 — Núcleo modular + Prisma + `/health`.
-- [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes.
+- [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes (en progreso: 2.1 Campañas completada).
 - [ ] Fase 3 — Combat tracker.
 - [ ] Fase 4 — SRD, generadores y loot.
 - [ ] Fase 5 — Fichas, statblocks, dados y reglas.
@@ -24,12 +24,13 @@
 - [x] Dashboard React con contrato Zod compartido y Tailwind 4.
 - [x] RNG seedable, dados, frontmatter y adaptador de vault con tests.
 
-## Fase 2 — Campañas, sesiones y wiki
+## Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes
 
-- [ ] CRUD de campañas y sesiones.
-- [ ] Wiki de entidades con tipos y relaciones.
-- [ ] Búsqueda SQLite FTS5.
-- [ ] Pendientes y continuidad.
+- [x] 2.1 Campañas (CRUD, estado ACTIVE/ARCHIVED, listado/detalle, validación compartida).
+- [ ] 2.2 Sesiones.
+- [ ] 2.3 Wiki de entidades + tags.
+- [ ] 2.4 Búsqueda SQLite FTS5.
+- [ ] 2.5 Pendientes y continuidad.
 
 ## Deuda técnica / decisiones abiertas
 
@@ -44,7 +45,8 @@
 - [ ] `apps/api/src/modules/health`: decidir si es un módulo de infraestructura exento de `repo`/`schema` o completar la convención; documentar la decisión en `docs/ARCHITECTURE.md`.
 - [ ] Sustituir las reglas por módulo de dependency-cruiser (`no-cross-module-deep-import-*`) por un mecanismo escalable antes de la Fase 3; cada módulo nuevo exige reglas nuevas.
 - [ ] `apps/api/package.json`: `@proyectodm/domain` y `@proyectodm/vault` aún sin uso; retirarlos hasta la Fase 4/6 o justificar su presencia.
-- [ ] Revisar el límite de chunk del bundle web (>500 kB) antes de v1.0.0.
+- [ ] Añadir tests de componentes/hooks web (requiere jsdom + @testing-library/react).
+- [ ] Evaluar `manualChunks` para bajar el entry de 602 kB (el bundle web supera el aviso de >500 kB); revisar antes de v1.0.0.
 - [ ] Restaurar un `db:seed` real cuando exista seed de datos demo (el script se eliminó por no tener configuración).
 
 ## Notas de proceso

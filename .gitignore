@@ -21,6 +21,7 @@ npm-debug.log*
 **/prisma/*.db-journal
 **/prisma/*.db-wal
 apps/api/src/generated/
+apps/api/.tmp-tests/
 backups/
 data/local/
 

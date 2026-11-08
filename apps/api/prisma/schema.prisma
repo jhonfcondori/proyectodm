@@ -9,14 +9,25 @@ datasource db {
   provider = "sqlite"
 }
 
+enum CampaignStatus {
+  ACTIVE
+  ARCHIVED
+}
+
 model Campaign {
-  id          String    @id @default(cuid())
+  id          String         @id @default(cuid())
+  // Name uniqueness is application-level (service `existsByName` -> 409), not a
+  // DB constraint: single-user local app, and a DB unique index would force
+  // data-mutating dedupe in migrations. Do not add @@unique([name]) here.
   name        String
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  status      CampaignStatus @default(ACTIVE)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   sessions    Session[]
   entities    Entity[]
+
+  @@index([status, updatedAt])
 }
 
 model Session {
