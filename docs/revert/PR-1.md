@@ -6,7 +6,7 @@
 
 - Branch: `feat/f1-core`
 - Base: `dev`
-- Feature head SHA: `PENDING (fill after first commit)`
+- Feature head SHA: `790a594452a957371e43d235cf4e91e0df1be4a7`
 - Pre-merge `dev`: `f9b70101a28d369da1565b5ccdf2a4781661d298` (tag `pre-merge-pr-1`)
 - Merge commit SHA: `PENDING (fill after merge)`
 - Date: `2026-11-07`
@@ -23,9 +23,13 @@ This PR creates the first database, so there was no data to preserve.
 
 ## Code revert
 
+ProyectoDM squash-merges PRs into `dev`, so the commit that lands on `dev` is a regular
+(non-merge) commit and `git revert -m 1` would fail with "mainline was specified but commit is not a merge".
+Use `<merge_sha>` = the squash commit SHA recorded above:
+
 ```bash
 git switch dev
-git revert -m 1 <merge_sha>
+git revert <merge_sha>
 git push origin dev
 ```
 
