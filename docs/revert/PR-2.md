@@ -6,22 +6,29 @@
 
 - Branch: `feat/f2-campaigns`
 - Base: `dev`
-- Feature head SHA: `2eb42b15622e9652cdc8f8c5b131e5db2b88ec76`
+- Feature head SHA: `6cb7607b9817ad606df39d869a2d753f17753522`
+- Feature commit message: `feat(f2): add campaign CRUD, status and web shell`
 - Pre-merge `dev`: `f9b70101a28d369da1565b5ccdf2a4781661d298` (tag `pre-merge-pr-2`)
-- Merge commit SHA: `PENDING (fill after merge)`
+- Squash merge SHA (the squashed commit on `dev`): `PENDING (fill after merge)`
 - Date: `2026-11-08`
 
 ## Database backup
 
 - Path: `L:\ProyectoDM\backups\db\proyectodm-20261108-004012-pre-f2-campaigns.db`
 - SHA256: `5c3aa30650e1973ae4ce8cc0c81b1d1f5284299283e966b374b46077397cfffc`
-- Migrations applied: `20261108044135_f2_campaigns_status`
+- Migrations applied: `20261108044135_f2_campaigns_status` (logical name: `f2_campaigns_status`)
 
 ## Code revert
 
+This repository uses **squash merge**: the commit that lands on `dev` is a
+single squashed commit, not a merge commit. Do NOT use `-m 1` (it fails with
+"mainline was specified but commit is not a merge"). Replace
+`PENDING (fill after merge)` with the squashed commit SHA on `dev` after merge.
+
 ```bash
 git switch dev
-git revert -m 1 PENDING (fill after merge)
+git pull --ff-only origin dev
+git revert PENDING (fill after merge)
 git push origin dev
 ```
 
@@ -34,12 +41,20 @@ git reset --hard pre-merge-pr-2
 ## Database revert
 
 ```bash
-npm run db:restore -- --file L:\ProyectoDM\backups\db\proyectodm-20261108-004012-pre-f2-campaigns.db --yes
-npx prisma migrate resolve --rolled-back <migration_name>
-npx prisma migrate deploy
+# 1. Stop the API so no process holds the SQLite file open.
+# 2. Restore the pre-merge backup (path is quoted because it is a Windows path):
+npm run db:restore -- --file "L:\ProyectoDM\backups\db\proyectodm-20261108-004012-pre-f2-campaigns.db" --yes
+# 3. Regenerate the Prisma client against the restored schema:
+npx prisma generate
 ```
 
-If there was no migration, skip the `prisma` commands.
+Do NOT use `npx prisma migrate resolve --rolled-back` or
+`npx prisma migrate deploy` here. The restored backup
+(`proyectodm-20261108-004012-pre-f2-campaigns.db`) predates migration
+`20261108044135_f2_campaigns_status`, so its `_prisma_migrations` table does
+not record it either. `resolve --rolled-back` would have nothing to resolve,
+and `migrate deploy` would re-apply the migration you are trying to undo. The
+restore alone returns the database to the pre-migration state.
 
 ## Feature flags
 
@@ -55,4 +70,13 @@ If there was no migration, skip the `prisma` commands.
 
 ## Notes
 
-None
+- Migration `20261108044135_f2_campaigns_status` is **expand-only**: it adds
+  the `status` column and an index, with no `DROP` statements. Rolling back by
+  restoring the pre-migration backup is safe and loses only data written
+  after the backup was taken.
+- `Campaign.name` uniqueness is enforced at the application layer, not by a
+  database constraint. Do not rely on the database to reject duplicate names.
+- The web bundle entry is 602.68 kB (preexisting warning, not introduced by
+  this PR).
+- The backup path contains backslashes; always quote it when passing it to
+  `npm run db:restore`.
