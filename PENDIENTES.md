@@ -5,8 +5,8 @@
 ## Estado actual
 
 - [x] Fase 0 — Gobierno, repo, CI, backup/revert y equipo de agentes.
-- [ ] Fase 0.5 — Fusión del vault local (fuera del repo).
-- [ ] Fase 1 — Núcleo modular + Prisma + `/health`.
+- [x] Fase 0.5 — Fusión del vault local (fuera del repo).
+- [x] Fase 1 — Núcleo modular + Prisma + `/health`.
 - [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes.
 - [ ] Fase 3 — Combat tracker.
 - [ ] Fase 4 — SRD, generadores y loot.
@@ -16,11 +16,20 @@
 
 ## Fase 1 — Núcleo modular
 
-- [ ] Monorepo `apps/web`, `apps/api`, `packages/{shared,domain,vault}`.
-- [ ] Express 5 + Vite + Prisma + Zod + lint de límites.
-- [ ] Esquema inicial: `campaigns`, `sessions`, `entities`, `settings`.
-- [ ] Migración inicial y `/health`.
-- [ ] Scripts `dev`, `build`, `lint`, `typecheck`, `test`.
+- [x] Monorepo `apps/web`, `apps/api`, `packages/{shared,domain,vault}`.
+- [x] Express 5 + Vite + Prisma 7 + Zod + dependency-cruiser.
+- [x] Esquema inicial: `Campaign`, `Session`, `Entity`, `Setting`.
+- [x] Migración inicial y `/api/v1/health` con sonda SQLite.
+- [x] Scripts `dev`, `build`, `lint`, `typecheck`, `test`, `db:*`.
+- [x] Dashboard React con contrato Zod compartido y Tailwind 4.
+- [x] RNG seedable, dados, frontmatter y adaptador de vault con tests.
+
+## Fase 2 — Campañas, sesiones y wiki
+
+- [ ] CRUD de campañas y sesiones.
+- [ ] Wiki de entidades con tipos y relaciones.
+- [ ] Búsqueda SQLite FTS5.
+- [ ] Pendientes y continuidad.
 
 ## Deuda técnica / decisiones abiertas
 
@@ -29,6 +38,18 @@
 - [ ] README bilingüe ES/EN si el proyecto se internacionaliza.
 - [ ] Activar branch protection en GitHub para `dev` y `main`.
 - [ ] Configurar `gitleaks` local además de CI.
+- [ ] Evaluar CORS/Helmet cuando exista despliegue cross-origin (hoy la API solo sirve en local con el proxy de Vite).
+- [ ] Revisar el round-trip de `serializeNote` con cuerpos que terminan en múltiples saltos de línea (`packages/vault/src/frontmatter.ts`).
+- [ ] `packages/vault/src/fs-adapter.ts`: `exists()` debe relanzar los errores distintos de `ENOENT` en lugar de devolver `false`.
+- [ ] `apps/api/src/modules/health`: decidir si es un módulo de infraestructura exento de `repo`/`schema` o completar la convención; documentar la decisión en `docs/ARCHITECTURE.md`.
+- [ ] Sustituir las reglas por módulo de dependency-cruiser (`no-cross-module-deep-import-*`) por un mecanismo escalable antes de la Fase 3; cada módulo nuevo exige reglas nuevas.
+- [ ] `apps/api/package.json`: `@proyectodm/domain` y `@proyectodm/vault` aún sin uso; retirarlos hasta la Fase 4/6 o justificar su presencia.
+- [ ] Revisar el límite de chunk del bundle web (>500 kB) antes de v1.0.0.
+- [ ] Restaurar un `db:seed` real cuando exista seed de datos demo (el script se eliminó por no tener configuración).
+
+## Notas de proceso
+
+- [ ] PR-1: rellenar `Feature head SHA` en `docs/revert/PR-1.md` tras el primer commit y `Merge commit SHA` tras fusionar (ver `docs/REVERT-PLAYBOOK.md`).
 
 ## Reglas de oro
 

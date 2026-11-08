@@ -66,9 +66,12 @@ The database mirrors vault content for search and structured state, but never si
 
 ## Database
 
-- Prisma + SQLite. `DATABASE_URL="file:./dev.db"`.
+- Prisma 7 + SQLite with the `better-sqlite3` driver adapter.
+- `DATABASE_URL="file:./apps/api/prisma/dev.db"`; paths are resolved from the repository root.
+- Schema: `apps/api/prisma/schema.prisma`; config: `prisma.config.ts`.
+- Generated client: `apps/api/src/generated/prisma` (ignored by git).
 - FTS5 virtual tables are created with manual SQL migrations because Prisma does not model virtual tables.
-- Every schema change requires a backup before `prisma migrate dev`.
+- Every schema change requires a backup before `npm run db:migrate`.
 - SQLite rollback is restore-from-backup. Prisma migrations are forward-only.
 - Destructive changes use expand/contract across separate PRs.
 
@@ -78,18 +81,20 @@ The database mirrors vault content for search and structured state, but never si
 
 ```ts
 interface VaultAdapter {
-  list(): Promise<VaultFile[]>;
-  read(path: string): Promise<VaultFile>;
-  write(path: string, content: string): Promise<void>;
-  watch(onChange: (path: string) => void): () => void;
+  readonly root: string;
+  listNotes(): Promise<VaultNoteRef[]>;
+  readNote(path: string): Promise<VaultNote>;
+  writeNote(note: VaultNote): Promise<void>;
+  exists(path: string): Promise<boolean>;
 }
 ```
 
 Adapters:
 
-1. `FileSystemVaultAdapter` — default, no plugin needed.
+1. `FsVaultAdapter` — default, no plugin needed.
 2. `LocalRestApiVaultAdapter` — optional, requires the Obsidian Local REST API community plugin.
 3. A custom Obsidian plugin bridge — future work.
+4. `watch(onChange)` will be added with the bidirectional sync engine in Phase 6.
 
 Frontmatter on exported notes includes a stable `dm_id`, `dm_type`, `campaign` and `updated_at`.
 
@@ -98,6 +103,7 @@ Frontmatter on exported notes includes a stable `dm_id`, `dm_type`, `campaign` a
 - Base path: `/api/v1`.
 - Validation with Zod contracts from `packages/shared`.
 - Response envelope: `{ data, meta }` or `{ error: { code, message, details } }`.
+- `GET /health` is the exception: it returns the shared `HealthResponse` directly so monitoring can read it without unwrapping.
 - Pagination: `?page=&limit=`.
 - Error codes: 400, 404, 409, 422.
 

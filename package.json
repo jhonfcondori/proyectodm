@@ -13,19 +13,39 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "node -e \"console.log('Fase 1 pendiente: npm run dev')\"",
-    "build": "node -e \"console.log('Fase 1 pendiente: npm run build')\"",
-    "lint": "node -e \"console.log('Fase 1 pendiente: npm run lint')\"",
-    "typecheck": "node -e \"console.log('Fase 1 pendiente: npm run typecheck')\"",
-    "test": "node -e \"console.log('Fase 1 pendiente: npm run test')\"",
+    "predev": "npm run db:generate",
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run dev -w @proyectodm/api",
+    "dev:web": "npm run dev -w @proyectodm/web",
+    "prebuild": "npm run db:generate",
+    "build": "npm run build -w @proyectodm/api && npm run build -w @proyectodm/web",
+    "lint": "eslint . && npm run lint:arch",
+    "lint:arch": "depcruise apps packages --config .dependency-cruiser.cjs",
+    "typecheck": "npm run db:generate && npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
     "db:backup": "node scripts/db-backup.mjs",
     "db:restore": "node scripts/db-restore.mjs",
     "revert:prep": "node scripts/revert-prep.mjs",
     "privacy:check": "node scripts/privacy-check.mjs",
-    "pr:ready": "npm run lint && npm run typecheck && npm run test && npm run privacy:check",
+    "pr:ready": "npm run db:generate && npm run lint && npm run typecheck && npm run test && npm run build && npm run privacy:check",
     "prepare": "husky"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.2",
+    "concurrently": "^10.0.7",
+    "dependency-cruiser": "^18.7.2",
+    "dotenv": "^18.0.9",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "prisma": "^7.10.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1"
   }
 }

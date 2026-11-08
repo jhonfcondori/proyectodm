@@ -6,7 +6,7 @@ import path from 'node:path'
 function parseArgs(argv) {
   const args = {
     file: null,
-    to: path.join('prisma', 'dev.db'),
+    to: path.join('apps', 'api', 'prisma', 'dev.db'),
     yes: false,
   }
   for (let i = 0; i < argv.length; i += 1) {
@@ -27,7 +27,7 @@ function timestamp() {
 const args = parseArgs(process.argv.slice(2))
 
 if (!args.file) {
-  console.error('Usage: npm run db:restore -- --file <backup.db> --yes [--to prisma/dev.db]')
+  console.error('Usage: npm run db:restore -- --file <backup.db> --yes [--to apps/api/prisma/dev.db]')
   process.exit(1)
 }
 
@@ -55,4 +55,4 @@ if (existsSync(to)) {
 await mkdir(path.dirname(to), { recursive: true })
 await copyFile(file, to)
 console.log(`Database restored: ${file} -> ${to}`)
-console.log('Next: npx prisma migrate resolve --rolled-back <migration> (if needed), then npx prisma migrate deploy.')
+  console.log('Next: npm run db:deploy (and npm run db:generate if the schema changed).')

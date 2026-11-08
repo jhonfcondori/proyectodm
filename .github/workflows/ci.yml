@@ -34,6 +34,9 @@ jobs:
             npm install --ignore-scripts
           fi
 
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
       - name: Lint
         run: npm run lint --if-present
 
