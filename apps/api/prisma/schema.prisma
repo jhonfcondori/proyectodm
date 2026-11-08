@@ -1,0 +1,70 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Campaign {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sessions    Session[]
+  entities    Entity[]
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  campaignId String
+  number     Int
+  title      String
+  summary    String?
+  playedAt   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, number])
+  @@index([campaignId, playedAt])
+}
+
+enum EntityType {
+  CHARACTER
+  NPC
+  LOCATION
+  ITEM
+  FACTION
+  DEITY
+  VEHICLE
+  CREATURE
+  OTHER
+}
+
+model Entity {
+  id         String     @id @default(cuid())
+  campaignId String
+  type       EntityType
+  name       String
+  summary    String?
+  content    String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  campaign   Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, type, name])
+  @@index([campaignId, type])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

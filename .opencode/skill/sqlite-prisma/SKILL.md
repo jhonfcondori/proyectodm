@@ -12,7 +12,11 @@ description: Use before any Prisma schema change, migration, db push, seed, FTS5
 
 ## Migrations
 
-- Prisma + SQLite. `DATABASE_URL="file:./dev.db"`.
+- Prisma 7 + SQLite with the `better-sqlite3` driver adapter.
+- Schema: `apps/api/prisma/schema.prisma`. Database: `apps/api/prisma/dev.db`.
+- `DATABASE_URL="file:./apps/api/prisma/dev.db"` (resolved from the repo root).
+- Prisma 7 config lives in `prisma.config.ts`; env vars are loaded explicitly.
+- Generated client: `apps/api/src/generated/prisma` (ignored by git; run `npm run db:generate`).
 - Applied migrations are immutable; add a new migration.
 - SQLite has no automatic down migrations: rollback is restore-from-backup.
 - Destructive changes use expand/contract across separate PRs.
@@ -22,8 +26,8 @@ description: Use before any Prisma schema change, migration, db push, seed, FTS5
 
 ```bash
 npm run db:restore -- --file <backup.db> --yes
-npx prisma migrate resolve --rolled-back <migration>
-npx prisma migrate deploy
+npm run db:deploy
+npm run db:generate
 ```
 
 Stop the API before restoring. The script saves the current database first.

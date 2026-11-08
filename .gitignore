@@ -17,16 +17,17 @@ npm-debug.log*
 *.db-wal
 *.sqlite
 *.sqlite3
-prisma/*.db
-prisma/*.db-journal
-prisma/*.db-wal
+**/prisma/*.db
+**/prisma/*.db-journal
+**/prisma/*.db-wal
+apps/api/src/generated/
 backups/
 data/local/
 
 # Campaign and private material: NEVER commit these
-DocMaterial/
-vault/
-respaldos/
+/DocMaterial/
+/vault/
+/respaldos/
 
 # Obsidian noise if a vault is ever placed inside the repo
 .obsidian/workspace.json

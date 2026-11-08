@@ -7,7 +7,7 @@ import path from 'node:path'
 function parseArgs(argv) {
   const args = {
     label: 'manual',
-    src: path.join('prisma', 'dev.db'),
+    src: path.join('apps', 'api', 'prisma', 'dev.db'),
     dest: null,
     requireDb: false,
     vacuum: true,

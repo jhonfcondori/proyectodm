@@ -20,7 +20,7 @@ git push origin pre-merge-pr-<number>
 
 ## 2. Back up the database before touching it
 
-Required before `prisma migrate dev`, `prisma db push`, schema edits, seeds, FTS5 migrations or bulk imports.
+Required before `npm run db:migrate`, `npm run db:push`, schema edits, seeds, FTS5 migrations or bulk imports.
 
 ```bash
 npm run db:backup -- --label <short-label>
@@ -51,7 +51,7 @@ This creates `docs/revert/PR-<number>.md` from `docs/revert/TEMPLATE.md`, includ
 - Exact code and database revert commands.
 - Post-revert verification steps.
 
-CI rejects a PR that changes `prisma/**` without its revert document.
+CI rejects a PR that changes `apps/api/prisma/**` or `prisma.config.ts` without its revert document.
 
 ## Reverting code and database
 
@@ -65,8 +65,8 @@ Then restore the database:
 
 ```bash
 npm run db:restore -- --file <pre-migration-backup> --yes
-npx prisma migrate resolve --rolled-back <migration_name>
-npx prisma migrate deploy
+npm run db:deploy
+npm run db:generate
 npm run test
 npm run build
 ```

@@ -4,7 +4,7 @@
 
 Local-first web app to help Dungeon Masters run D&D 5e campaigns: campaigns and sessions, campaign wiki, combat tracker, NPC/encounter/loot generators, character sheets, statblocks, dice, rules search, random tables and Obsidian sync.
 
-> Status: **Phase 0 complete** — repository governance, CI, database backup/revert tooling, and the opencode agent team. The application scaffold starts in Phase 1.
+> Status: **Phase 1 complete** — modular monorepo scaffold, Prisma 7 + SQLite, shared Zod contracts, deterministic domain primitives, vault adapter, API `/api/v1/health` and a React health dashboard. Next: Phase 2 (campaigns, sessions, wiki, search).
 
 ## Why
 
@@ -22,9 +22,9 @@ Running a campaign means tracking dozens of open threads: NPCs, debts, clues, pe
 | --- | --- |
 | Frontend | React 19 + Vite + TypeScript + Tailwind + TanStack Query |
 | Backend | Node 24 + Express 5 + TypeScript + Zod |
-| Database | SQLite + Prisma |
+| Database | SQLite + Prisma 7 (driver adapter) |
 | Search | SQLite FTS5 |
-| Tests | Vitest + Supertest + Playwright |
+| Tests | Vitest + Supertest (Playwright in Phase 7) |
 | Repo | npm workspaces monorepo |
 
 ## Planned modules
@@ -38,10 +38,23 @@ Backend modules live in `apps/api/src/modules/<module>/` and follow the same pub
 ```bash
 npm install
 cp .env.example .env   # Windows: Copy-Item .env.example .env
+npm run db:migrate     # first run only; creates apps/api/prisma/dev.db
 npm run dev
 ```
 
-The app is not scaffolded yet (Phase 1). Until then, `npm run dev` prints a placeholder message.
+- Web: <http://127.0.0.1:5173>
+- API health: <http://127.0.0.1:3001/api/v1/health>
+
+Useful checks:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+`npm run db:generate` regenerates the Prisma client after schema changes. Prisma 7 writes it to `apps/api/src/generated/prisma` (ignored by git).
 
 ## Golden rules
 

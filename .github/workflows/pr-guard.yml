@@ -36,7 +36,7 @@ jobs:
           changed=$(git diff --name-only "origin/$base...HEAD")
           echo "Changed files:"
           echo "$changed"
-          if echo "$changed" | grep -qE '^(prisma/(schema\.prisma|migrations/)|scripts/db-)'; then
+          if echo "$changed" | grep -qE '^(apps/api/prisma/(schema\.prisma|migrations/)|prisma\.config\.ts|scripts/db-)'; then
             doc="docs/revert/PR-${{ github.event.pull_request.number }}.md"
             if [ ! -f "$doc" ]; then
               echo "::error::Database change detected. Missing $doc. Run: npm run revert:prep -- --pr ${{ github.event.pull_request.number }} --branch <branch>"
