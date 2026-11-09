@@ -6,9 +6,10 @@
 
 - Branch: `feat/f2-campaigns`
 - Base: `dev`
-- Feature head SHA: `6cb7607b9817ad606df39d869a2d753f17753522`
+- Feature head SHA: `9b0131b432ce4ca2d575c279f694af88865cdf62`
 - Feature commit message: `feat(f2): add campaign CRUD, status and web shell`
-- Pre-merge `dev`: `f9b70101a28d369da1565b5ccdf2a4781661d298` (tag `pre-merge-pr-2`)
+- Branch tip SHA: `e58da25cbcb22167276fbc5db88e5b031d307c76`
+- Pre-merge `dev`: `67903c7c8452f4495fa36a369e6b1a60b2ab4d3c` (squash of PR #1; tag `pre-merge-pr-2` does not exist yet and will be created on `dev` before merging this PR)
 - Squash merge SHA (the squashed commit on `dev`): `PENDING (fill after merge)`
 - Date: `2026-11-08`
 
