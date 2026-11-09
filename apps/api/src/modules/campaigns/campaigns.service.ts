@@ -20,6 +20,13 @@ export interface ListCampaignsResult {
   }
 }
 
+// Error copy used when a race hits a Prisma constraint after the service-level
+// checks (duplicate name, or the row disappearing between read and write).
+const PRISMA_MESSAGES = {
+  conflict: 'A campaign with this name already exists',
+  notFound: 'Campaign not found',
+}
+
 function toCampaign(record: CampaignRecord): Campaign {
   return {
     id: record.id,
@@ -86,7 +93,7 @@ export async function createCampaign(
   } catch (error) {
     // Race: name uniqueness is application-level, so a concurrent create can
     // slip past existsByName. Map P2002 (if any unique constraint) to 409.
-    throw fromPrismaError(error)
+    throw fromPrismaError(error, PRISMA_MESSAGES)
   }
   return toCampaign(record)
 }
@@ -130,7 +137,7 @@ export async function updateCampaign(
     })
   } catch (error) {
     // P2002 -> 409 (duplicate name race), P2025 -> 404 (deleted between check and write).
-    throw fromPrismaError(error)
+    throw fromPrismaError(error, PRISMA_MESSAGES)
   }
   return toCampaign(record)
 }
@@ -145,7 +152,7 @@ export async function deleteCampaign(prisma: PrismaClient, id: string): Promise<
     await repo.remove(prisma, id)
   } catch (error) {
     // P2025 -> 404 if deleted between the existence check and the delete.
-    throw fromPrismaError(error)
+    throw fromPrismaError(error, PRISMA_MESSAGES)
   }
   return { id }
 }

@@ -30,19 +30,30 @@ model Campaign {
   @@index([status, updatedAt])
 }
 
+enum SessionStatus {
+  DRAFT
+  PLAYED
+  CLOSED
+}
+
 model Session {
-  id         String    @id @default(cuid())
+  id         String        @id @default(cuid())
   campaignId String
   number     Int
   title      String
   summary    String?
   playedAt   DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  status     SessionStatus @default(DRAFT)
+  // Path of the session note inside the Obsidian vault. Null until the vault
+  // module (phase 6) links the session to a note.
+  notePath   String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  campaign   Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, number])
   @@index([campaignId, playedAt])
+  @@index([campaignId, status])
 }
 
 enum EntityType {

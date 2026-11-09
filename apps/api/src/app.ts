@@ -3,6 +3,7 @@ import { sendError, validationError } from './http/errors'
 import type { PrismaClient } from './generated/prisma/client'
 import { createHealthRouter, type HealthModuleOptions } from './modules/health/index'
 import { createCampaignsRouter } from './modules/campaigns/index'
+import { createSessionsRouter } from './modules/sessions/index'
 
 export type AppDependencies = HealthModuleOptions & { prisma?: PrismaClient }
 
@@ -17,6 +18,9 @@ export function createApp(deps: AppDependencies): Express {
   // tests can build the app without a BD (no singleton import here).
   if (deps.prisma !== undefined) {
     app.use('/api/v1/campaigns', createCampaignsRouter({ prisma: deps.prisma }))
+    // Mounted at /api/v1 because sessions mix campaign-scoped collection routes
+    // (/campaigns/:campaignId/sessions) with direct item routes (/sessions/:id).
+    app.use('/api/v1', createSessionsRouter({ prisma: deps.prisma }))
   }
 
   app.use((_request, response) => {

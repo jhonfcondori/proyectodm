@@ -8,10 +8,10 @@ import { DeleteCampaignDialog } from '../components/DeleteCampaignDialog'
 import { useCampaign, useDeleteCampaign, useUpdateCampaign } from '../hooks'
 
 // Future sub-routes of the detail page. The tabs below are placeholders that
-// point at them: they stay disabled until those pages exist.
+// point at them: they stay disabled until those pages exist. Sessions already
+// exists and is rendered as a real Link above them.
 function futureTabs(campaignId: string) {
   return [
-    { id: 'sessions', label: 'Sesiones', path: `/campaigns/${campaignId}/sessions` },
     { id: 'wiki', label: 'Wiki', path: `/campaigns/${campaignId}/wiki` },
     { id: 'pending', label: 'Pendientes', path: `/campaigns/${campaignId}/pendientes` },
   ]
@@ -153,6 +153,14 @@ export function CampaignDetailPage() {
         >
           Resumen
         </button>
+        <Link
+          to={`/campaigns/${campaignId}/sessions`}
+          role="tab"
+          aria-selected="false"
+          className="rounded-t-lg px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800/60 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
+        >
+          Sesiones
+        </Link>
         {futureTabs(campaignId).map((tab) => (
           <button
             key={tab.id}
@@ -195,7 +203,14 @@ export function CampaignDetailPage() {
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
             <dt className="text-xs uppercase tracking-wide text-slate-500">Sesiones</dt>
-            <dd className="mt-1 text-2xl font-semibold text-white">{campaign.sessionCount}</dd>
+            <dd className="mt-1 text-2xl font-semibold text-white">
+              <Link
+                to={`/campaigns/${campaign.id}/sessions`}
+                className="rounded-sm transition hover:text-amber-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
+              >
+                {campaign.sessionCount}
+              </Link>
+            </dd>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
             <dt className="text-xs uppercase tracking-wide text-slate-500">Entidades</dt>

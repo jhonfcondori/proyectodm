@@ -30,6 +30,13 @@ export function conflict(message: string): HttpError {
   return new HttpError(409, 'CONFLICT', message)
 }
 
+// State machine violation (e.g. a session jumping DRAFT -> CLOSED). Uses 409
+// with the dedicated INVALID_TRANSITION code so clients can tell it apart from
+// a duplicate-name conflict.
+export function invalidTransition(message: string, details?: unknown): HttpError {
+  return new HttpError(409, 'INVALID_TRANSITION', message, details)
+}
+
 export function internalError(message = 'Unexpected server error'): HttpError {
   return new HttpError(500, 'INTERNAL_ERROR', message)
 }
@@ -42,17 +49,28 @@ export function internalError(message = 'Unexpected server error'): HttpError {
 // across ESM/CJS test setups, and importing the client here would couple
 // the HTTP layer to the generated client. Non-Prisma errors pass through
 // unchanged, except a generic 500 HttpError, which is also returned as-is.
-export function fromPrismaError(error: unknown): unknown {
+export interface PrismaErrorMessages {
+  conflict?: string
+  notFound?: string
+}
+
+const DEFAULT_CONFLICT_MESSAGE = 'A record with these values already exists'
+const DEFAULT_NOT_FOUND_MESSAGE = 'Record not found'
+
+export function fromPrismaError(
+  error: unknown,
+  messages: PrismaErrorMessages = {},
+): unknown {
   if (error instanceof HttpError) {
     return error
   }
   if (error !== null && typeof error === 'object' && 'code' in error) {
     const code = (error as { code?: unknown }).code
     if (code === 'P2002') {
-      return conflict('A campaign with this name already exists')
+      return conflict(messages.conflict ?? DEFAULT_CONFLICT_MESSAGE)
     }
     if (code === 'P2025') {
-      return notFound('Campaign not found')
+      return notFound(messages.notFound ?? DEFAULT_NOT_FOUND_MESSAGE)
     }
   }
   return error
