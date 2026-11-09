@@ -29,10 +29,16 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then
-            npm ci --ignore-scripts
+            npm ci
           else
-            npm install --ignore-scripts
+            npm install
           fi
+
+      - name: Rebuild native modules
+        run: npm rebuild better-sqlite3
+
+      - name: Verify SQLite native binding
+        run: node -e "require('better-sqlite3'); console.log('better-sqlite3 binding OK')"
 
       - name: Generate Prisma Client
         run: npm run db:generate
