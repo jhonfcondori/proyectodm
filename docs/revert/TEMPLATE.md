@@ -8,7 +8,7 @@
 - Base: `dev`
 - Feature head SHA: `<feature_sha>`
 - Pre-merge `dev`: `<pre_merge_dev_sha>` (tag `pre-merge-pr-<number>`)
-- Merge commit SHA: `<merge_sha_or_pending>`
+- Squash merge SHA (the squashed commit on `dev`): `<merge_sha_or_pending>`
 - Date: `<date>`
 
 ## Database backup
@@ -19,9 +19,14 @@
 
 ## Code revert
 
+This repository uses **squash merge**: the commit that lands on `dev` is a
+single squashed commit, not a merge commit. Do NOT use `-m 1` (it fails with
+"mainline was specified but commit is not a merge").
+
 ```bash
 git switch dev
-git revert -m 1 <merge_sha>
+git pull --ff-only origin dev
+git revert <merge_sha>
 git push origin dev
 ```
 
@@ -34,12 +39,21 @@ git reset --hard pre-merge-pr-<number>
 ## Database revert
 
 ```bash
-npm run db:restore -- --file <backup_path> --yes
-npx prisma migrate resolve --rolled-back <migration_name>
-npx prisma migrate deploy
+# 1. Stop the API so no process holds the SQLite file open.
+# 2. Restore the pre-merge backup (quote the path — Windows paths contain backslashes):
+npm run db:restore -- --file "<backup_path>" --yes
+# 3. Regenerate the Prisma client against the restored schema:
+npx prisma generate
 ```
 
-If there was no migration, skip the `prisma` commands.
+Do NOT use `npx prisma migrate resolve --rolled-back <migration_name>` or
+`npx prisma migrate deploy` here. The restored backup predates the migration,
+so its `_prisma_migrations` table does not record it either; `resolve
+--rolled-back` would have nothing to resolve and `migrate deploy` would
+re-apply the migration you are trying to undo.
+
+If there was no migration (no database change), skip the `prisma` commands and
+the restore entirely.
 
 ## Feature flags
 

@@ -1,5 +1,5 @@
 import type { HealthResponse } from '@proyectodm/shared'
-import { StatusBadge, type BadgeStatus } from './StatusBadge'
+import { deriveHealthBadge, StatusBadge } from './StatusBadge'
 
 interface HealthCardProps {
   health: HealthResponse | undefined
@@ -18,20 +18,7 @@ function formatTimestamp(timestamp: string): string {
 
 export function HealthCard({ health, isLoading, isFetching, error, onRetry }: HealthCardProps) {
   const database = health?.checks.database
-  const status: BadgeStatus = error
-    ? 'error'
-    : isLoading
-      ? 'loading'
-      : health?.status === 'ok'
-        ? 'ok'
-        : 'degraded'
-  const label = error
-    ? 'Sin conexión'
-    : isLoading
-      ? 'Comprobando'
-      : health?.status === 'ok'
-        ? 'Operativo'
-        : 'Degradado'
+  const { status, label } = deriveHealthBadge(health, isLoading, error)
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl shadow-slate-950/40">
