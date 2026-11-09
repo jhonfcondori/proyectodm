@@ -2,50 +2,46 @@
 
 > Si acabas de recibir "continúa", lee este archivo completo antes de tocar nada.
 
-- Fecha: 2026-11-08 21:26:47 -04:00
+- Fecha: 2026-11-08 21:37:50 -04:00
 
 ## Estado de ramas y PRs
 
-- `dev` = `67903c7c8452f4495fa36a369e6b1a60b2ab4d3c` (squash de PR #1, Fase 1 fusionada).
-- Rama de trabajo actual: `feat/f2-campaigns`, rebasada sobre `dev` (merge-base `67903c7`).
-- Commits relevantes de la rama (en orden): `9b0131b` (funcional 2.1), `e58da25` (docs: correct squash-merge revert steps for PR-2), `b99a66b` (docs: refresh PR-2 revert metadata after rebase), `072b7f9` (docs revert PR-3), y el commit del checkpoint que se añadirá después.
+- `dev` = `06446a9ddb1ff9bf107fd32c823094039c7957c5` (squash de PR #3, Fase 2.1 fusionada). Fase 1 (`67903c7`) y Fase 2.1 están fusionadas en `dev`.
+- Rama de trabajo actual: `chore/f2-handoff` (creada desde `dev` en `06446a9`).
 - PR #1: FUSIONADO (squash `67903c7`).
-- PR #2: CERRADO sin fusionar. Motivo: `gh pr merge 1 --delete-branch` borró `feat/f1-core`, que era su base, y GitHub lo cerró; no se pudo reabrir porque la rama se había force-pusheado. NO reutilizar el número 2.
-- PR #3: ABIERTO, https://github.com/jhonfcondori/proyectodm/pull/3, base `dev`, head `feat/f2-campaigns`. CI en ROJO.
-- Rama `feat/f1-core` fue recreada apuntando a `dev` (`67903c7`, tanto local como `origin`) solo para intentar reabrir PR #2; se puede borrar con seguridad.
+- PR #2: CERRADO sin fusionar. Motivo: `gh pr merge 1 --delete-branch` borró `feat/f1-core`, que era su base, y GitHub lo cerró; no se pudo reabrir porque la rama se había force-pusheado. NO reutilizar el número 2. Se intentó añadir un comentario remitiendo a #3, pero la API devuelve 0 comentarios (`gh api repos/jhonfcondori/proyectodm/issues/2/comments`); pendiente verificar y, si procede, repetir el comentario.
+- PR #3: FUSIONADO (squash `06446a9ddb1ff9bf107fd32c823094039c7957c5`, mensaje `feat(f2.1): campaign CRUD, status and campaign UI (#3)`). CI en VERDE tras arreglar `.github/workflows/ci.yml` (commit `7382599`).
+- Tag `pre-merge-pr-3` creado y pusheado sobre `67903c7c8452f4495fa36a369e6b1a60b2ab4d3c`.
+- Rama `feat/f2-campaigns`: FUSIONADA (tip antes del merge: `189047e`). Se puede borrar con `git branch -d feat/f2-campaigns`.
+- Rama `feat/f1-core`: borrada localmente; el borrado remoto falló y `origin/feat/f1-core` sigue existiendo. Reintentar con `git push origin --delete feat/f1-core`.
 
 ## Qué está terminado
 
 - Fase 1 completa y fusionada: monorepo, Prisma 7, migración `20261107192046_init`, `/api/v1/health`, RNG/dados seedables, vault adapter.
-- Fase 2.1 Campañas: migración `20261108044135_f2_campaigns_status` (expand-only), backend `campaigns`, contratos `packages/shared/src/{api,campaigns}.ts`, `apps/api/src/http/{errors,handler}.ts`, frontend con react-router 7 + `AppLayout` + módulo `campaigns`.
+- Fase 2.1 Campañas completa y fusionada: migración `20261108044135_f2_campaigns_status` (expand-only), backend `campaigns`, contratos `packages/shared/src/{api,campaigns}.ts`, `apps/api/src/http/{errors,handler}.ts`, frontend con react-router 7 + `AppLayout` + módulo `campaigns`.
 - Verificación local en Windows: `npm run pr:ready` en verde, 119 tests (api 38, web 35, domain 16, shared 22, vault 8).
 
-## Bloqueante actual (PRIMERO)
+## Resuelto en esta sesión
 
-CI de PR #3 falla en `Lint, typecheck, test, build, privacy` (Linux) con 24 tests fallidos de `apps/api/tests/campaigns.test.ts`:
-`Error: Could not locate the bindings file` en `@prisma/adapter-better-sqlite3` → `createBetterSQLite3Client`.
-Causa probable: `better-sqlite3` no tiene su binding nativo compilado/descargado en el runner (revisar `npm ci --ignore-scripts` en `.github/workflows/ci.yml` y/o la caché de npm). Confirmado: el paso `Install dependencies` del workflow usa `npm ci --ignore-scripts`.
-Pasos de diagnóstico ya hechos: `gh run view 42545195003 --log-failed`. El log muestra los 24 fallos en `tests/campaigns.test.ts` y el error de bindings; el resto de suites pasan.
-Plan recomendado:
-1. Revisar `.github/workflows/ci.yml` (paso `npm ci`) y quitar `--ignore-scripts` o añadir `npm rebuild better-sqlite3` en el job de test.
-2. Si el binding sigue sin estar disponible, degradar el helper `apps/api/tests/helpers/test-db.ts` para hacer `skip` explícito de la suite de integración, NUNCA silenciar el fallo.
-3. Verificar localmente con `npm run pr:ready` y pushear a `feat/f2-campaigns`.
+- CI de PR #3 en ROJO (`Error: Could not locate the bindings file` en `better-sqlite3`): el workflow usaba `npm ci --ignore-scripts`, por lo que el binding nativo no se compilaba/descargaba en el runner. Arreglado en `7382599` (`chore(ci): install better-sqlite3 bindings before running api tests`): `npm ci` sin `--ignore-scripts`, `npm rebuild better-sqlite3` y verificación del binding. Ese commit entró en el squash de PR #3 y el CI quedó en VERDE.
 
 ## Pasos siguientes en orden
 
-1. Arreglar CI de PR #3 y dejarlo en verde.
-2. Crear tag `pre-merge-pr-3` sobre `dev` (`67903c7`) y pushearlo: `git tag pre-merge-pr-3 dev; git push origin pre-merge-pr-3`.
-3. Fusionar PR #3 con squash: `gh pr merge 3 --squash` (sin `--delete-branch`).
-4. Actualizar `docs/revert/PR-3.md` con el `Squash merge SHA` real y commitear (`docs:` commit en una rama corta desde `dev` o directamente en el PR de la siguiente sub-fase). Ojo: el campo `Feature head SHA` de `docs/revert/PR-3.md` quedó obsoleto (cita `b99a66b`; el tip real de la rama antes de este checkpoint era `072b7f9`).
-5. Comentar y cerrar PR #2 remitiendo a #3.
-6. Borrar la rama temporal `feat/f1-core` (`git push origin --delete feat/f1-core; git branch -D feat/f1-core`).
-7. Arrancar **Fase 2.2 Sesiones** desde `dev` actualizado:
-   - `git switch dev && git pull --ff-only origin dev`
-   - `git switch -c feat/f2-sessions`
-   - `npm run db:backup -- --label pre-f2-sessions` (OBLIGATORIO antes de tocar Prisma)
-   - Diseño ya aprobado: `enum SessionStatus { DRAFT PLAYED CLOSED }`, `Session.status`, `Session.notePath String?`, índice `[campaignId, status]`, transiciones forward-only (`DRAFT→PLAYED→CLOSED`) con `409 INVALID_TRANSITION`, numeración automática `next-number`, UI de lista/detalle dentro de la campaña.
+1. Arrancar **Fase 2.2 Sesiones** desde `dev` actualizado:
+   - `git switch dev; git pull --ff-only origin dev; git switch -c feat/f2-sessions; npm run db:backup -- --label pre-f2-sessions` (el `db:backup` es OBLIGATORIO antes de tocar Prisma).
+   - Diseño aprobado para 2.2:
+     - `enum SessionStatus { DRAFT PLAYED CLOSED }` y `Session.status`.
+     - `Session.notePath String?`.
+     - Índice `[campaignId, status]`.
+     - Transiciones forward-only (`DRAFT→PLAYED→CLOSED`) con `409 INVALID_TRANSITION`.
+     - Numeración automática con `next-number`.
+     - UI de lista/detalle dentro de la campaña.
+     - Tests con el helper `apps/api/tests/helpers/test-db.ts`.
    - Revert doc con `npm run revert:prep -- --pr <nuevo> --branch feat/f2-sessions --backup <backup> --migrations f2_sessions_lifecycle`.
-8. Después: 2.3 Wiki + tags, 2.4 FTS5, 2.5 Pendientes/continuidad (diseño completo en el historial; resumen en `PENDIENTES.md`).
+2. Pendiente inmediato: reintentar `git push origin --delete feat/f1-core`.
+3. ~~Actualizar `docs/revert/PR-3.md`~~ (hecho: `Feature head SHA` = `189047e`, `Squash merge SHA` = `06446a9`, nota de `7382599`).
+4. Borrar la rama fusionada: `git branch -d feat/f2-campaigns`.
+5. Después: 2.3 Wiki + tags, 2.4 FTS5, 2.5 Pendientes/continuidad (diseño completo en el historial; resumen en `PENDIENTES.md`).
 
 ## Reglas de oro (recordatorio)
 
@@ -70,7 +66,7 @@ Plan recomendado:
 git status --short
 git log --oneline -5
 gh pr list --state open
-gh pr checks 3
+gh run list --limit 5
 npm run pr:ready
 ```
 

@@ -4,14 +4,14 @@
 
 ## Punto de continuación
 
-> Antes de continuar, lee `docs/CHECKPOINT.md`. Estado de la sesión, PR abierto, bloqueante de CI y próximos pasos.
+> Antes de continuar, lee `docs/CHECKPOINT.md`. Estado de la sesión, PRs fusionados y próximos pasos.
 
 ## Estado actual
 
 - [x] Fase 0 — Gobierno, repo, CI, backup/revert y equipo de agentes.
 - [x] Fase 0.5 — Fusión del vault local (fuera del repo).
 - [x] Fase 1 — Núcleo modular + Prisma + `/health`.
-- [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes (en progreso: 2.1 Campañas completada).
+- [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes (en progreso: 2.1 Campañas completada y fusionada; siguiente 2.2 Sesiones).
 - [ ] Fase 3 — Combat tracker.
 - [ ] Fase 4 — SRD, generadores y loot.
 - [ ] Fase 5 — Fichas, statblocks, dados y reglas.
@@ -55,7 +55,7 @@
 
 ## Notas de proceso
 
-- [ ] PR-1: rellenar `Feature head SHA` en `docs/revert/PR-1.md` tras el primer commit y `Merge commit SHA` tras fusionar (ver `docs/REVERT-PLAYBOOK.md`).
+- [x] PR-1: `Feature head SHA` y `Squash merge SHA` rellenados en `docs/revert/PR-1.md` tras la fusión.
 
 ## Reglas de oro
 
