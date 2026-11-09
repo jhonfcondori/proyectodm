@@ -11,7 +11,7 @@
 - [x] Fase 0 — Gobierno, repo, CI, backup/revert y equipo de agentes.
 - [x] Fase 0.5 — Fusión del vault local (fuera del repo).
 - [x] Fase 1 — Núcleo modular + Prisma + `/health`.
-- [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes (en progreso: 2.1 Campañas completada y fusionada; siguiente 2.2 Sesiones).
+- [ ] Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes (en progreso: 2.1 Campañas fusionada, 2.2 Sesiones en PR #5; siguiente 2.3 Wiki + tags).
 - [ ] Fase 3 — Combat tracker.
 - [ ] Fase 4 — SRD, generadores y loot.
 - [ ] Fase 5 — Fichas, statblocks, dados y reglas.
@@ -31,8 +31,8 @@
 ## Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes
 
 - [x] 2.1 Campañas (CRUD, estado ACTIVE/ARCHIVED, listado/detalle, validación compartida).
-- [ ] 2.2 Sesiones (siguiente; ver `docs/CHECKPOINT.md`).
-- [ ] 2.3 Wiki de entidades + tags.
+- [x] 2.2 Sesiones (CRUD por campaña, numeración automática `max+1`, ciclo `DRAFT→PLAYED→CLOSED`, `next-number`, lista/detalle en la UI; PR #5).
+- [ ] 2.3 Wiki de entidades + tags (siguiente).
 - [ ] 2.4 Búsqueda SQLite FTS5.
 - [ ] 2.5 Pendientes y continuidad.
 
