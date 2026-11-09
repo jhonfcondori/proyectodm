@@ -6,10 +6,10 @@
 
 - Branch: `feat/f2-campaigns`
 - Base: `dev`
-- Feature head SHA: `b99a66b9438ccc96dac3871349d6a941237b1b43` (tip of `feat/f2-campaigns`)
+- Feature head SHA: `189047ecb142f9bfd95757f5ee69921a958d9c42` (tip of `feat/f2-campaigns` at merge time)
 - Feature commit SHA: `9b0131b432ce4ca2d575c279f694af88865cdf62` (functional commit of 2.1)
-- Pre-merge `dev`: `67903c7c8452f4495fa36a369e6b1a60b2ab4d3c` (tag `pre-merge-pr-3` — not created yet; it will be tagged on `dev` before merging)
-- Squash merge SHA (the squashed commit on `dev`): `PENDING (fill after merge)`
+- Pre-merge `dev`: `67903c7c8452f4495fa36a369e6b1a60b2ab4d3c` (tag `pre-merge-pr-3`, created and pushed on `dev` before merging)
+- Squash merge SHA (the squashed commit on `dev`): `06446a9ddb1ff9bf107fd32c823094039c7957c5`
 - Date: `2026-11-09`
 
 ## Database backup
@@ -27,7 +27,7 @@ single squashed commit, not a merge commit. Do NOT use `-m 1` (it fails with
 ```bash
 git switch dev
 git pull --ff-only origin dev
-git revert PENDING (fill after merge)
+git revert 06446a9ddb1ff9bf107fd32c823094039c7957c5
 git push origin dev
 ```
 
@@ -73,6 +73,11 @@ the restore entirely.
 - The migration is **expand-only**: it adds `Campaign.status` with a safe default (`'ACTIVE'`) and a composite
   index (`Campaign_status_updatedAt_idx`). It drops nothing, rewrites no rows and needs no data backfill, so
   restore-from-backup is a complete rollback for the database side.
+- CI for PR #3 was red until `7382599` (`chore(ci): install better-sqlite3 bindings before running api tests`):
+  the workflow used `npm ci --ignore-scripts`, so `better-sqlite3`'s native binding was never built/downloaded on
+  the runner and the API integration tests failed with `Could not locate the bindings file`. The fix dropped
+  `--ignore-scripts`, added `npm rebuild better-sqlite3` and a binding verification step; that commit is part of
+  the squash on `dev`.
 - `Campaign.name` uniqueness is enforced at the application level (service-level 409), not with a `@@unique`
   constraint, so no unique index exists on `name` and no migration dedupes user data.
 - The web production entry chunk is ~602.68 kB, above Vite's 500 kB warning threshold; see `PENDIENTES.md`
