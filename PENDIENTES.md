@@ -2,6 +2,10 @@
 
 > Backlog de desarrollo. No mezclar con los pendientes de la campaña, que viven en el vault local (`00_Hub/Pendientes.md`).
 
+## Punto de continuación
+
+> Antes de continuar, lee `docs/CHECKPOINT.md`. Estado de la sesión, PR abierto, bloqueante de CI y próximos pasos.
+
 ## Estado actual
 
 - [x] Fase 0 — Gobierno, repo, CI, backup/revert y equipo de agentes.
@@ -27,7 +31,7 @@
 ## Fase 2 — Campañas, sesiones, wiki, búsqueda y Pendientes
 
 - [x] 2.1 Campañas (CRUD, estado ACTIVE/ARCHIVED, listado/detalle, validación compartida).
-- [ ] 2.2 Sesiones.
+- [ ] 2.2 Sesiones (siguiente; ver `docs/CHECKPOINT.md`).
 - [ ] 2.3 Wiki de entidades + tags.
 - [ ] 2.4 Búsqueda SQLite FTS5.
 - [ ] 2.5 Pendientes y continuidad.
