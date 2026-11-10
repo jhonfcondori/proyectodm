@@ -13,7 +13,7 @@
 
 ## Database backup
 
-- Path: `L:\ProyectoDM\backups\db\proyectodm-20261109-162133-pre-f2-sessions.db`
+- Path: `backups/db/proyectodm-20261109-162133-pre-f2-sessions.db` (relative to the repository root)
 - SHA256: `7ec789f79ac9cd0395f06feb3da38b5208fabe839b561bad17c6635078dcdd9a`
 - Migrations applied: `20261109202758_f2_sessions_lifecycle (logical: f2_sessions_lifecycle)`
 
@@ -40,8 +40,8 @@ git reset --hard pre-merge-pr-5
 
 ```bash
 # 1. Stop the API so no process holds the SQLite file open.
-# 2. Restore the pre-merge backup (quote the path — Windows paths contain backslashes):
-npm run db:restore -- --file "L:\ProyectoDM\backups\db\proyectodm-20261109-162133-pre-f2-sessions.db" --yes
+# 2. Restore the pre-merge backup (run from the repository root):
+npm run db:restore -- --file "backups/db/proyectodm-20261109-162133-pre-f2-sessions.db" --yes
 # 3. Regenerate the Prisma client against the restored schema:
 npx prisma generate
 ```

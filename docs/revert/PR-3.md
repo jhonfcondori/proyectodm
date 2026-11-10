@@ -14,7 +14,7 @@
 
 ## Database backup
 
-- Path: `L:\ProyectoDM\backups\db\proyectodm-20261108-004012-pre-f2-campaigns.db`
+- Path: `backups/db/proyectodm-20261108-004012-pre-f2-campaigns.db` (relative to the repository root)
 - SHA256: `5c3aa30650e1973ae4ce8cc0c81b1d1f5284299283e966b374b46077397cfffc`
 - Migrations applied: `20261108044135_f2_campaigns_status (logical: f2_campaigns_status)`
 
@@ -42,7 +42,7 @@ git reset --hard pre-merge-pr-3
 ```bash
 # 1. Stop the API so no process holds the SQLite file open.
 # 2. Restore the pre-merge backup (quote the path — Windows paths contain backslashes):
-npm run db:restore -- --file "L:\ProyectoDM\backups\db\proyectodm-20261108-004012-pre-f2-campaigns.db" --yes
+npm run db:restore -- --file "backups/db/proyectodm-20261108-004012-pre-f2-campaigns.db" --yes
 # 3. Regenerate the Prisma client against the restored schema:
 npx prisma generate
 ```
