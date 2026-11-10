@@ -2,20 +2,20 @@
 
 > Si acabas de recibir "continúa", lee este archivo completo antes de tocar nada.
 
-- Fecha: 2026-11-09 17:33:05 -04:00
+- Fecha: 2026-11-10
 
 ## Estado de ramas y PRs
 
-- `dev` = `08d7c3f9e4bb9e140ed53545e44b9fe899d4cfc7` (squash de PR #4, docs de handoff). Fases 1, 2.1 y el handoff están fusionadas.
-- Rama de trabajo actual: `feat/f2-sessions`, tip funcional `bdd2bac` (un commit).
+- `dev` = `d419149590d9cc92f0e96030d041e4ab28a4b7b9` (squash de PR #5, Fase 2.2 Sesiones). Fases 1, 2.1, 2.2 y el handoff están fusionadas.
+- Rama de trabajo actual: `chore/f2.2-postmerge` (solo docs: SHA de fusión, backlog y este checkpoint).
 - PR #4: FUSIONADO (squash `08d7c3f`). Tag `pre-merge-pr-4` sobre `06446a9`.
-- PR #5: ABIERTO — `feat(f2.2): session lifecycle, numbering and campaign sessions UI`. Base `dev`, tag `pre-merge-pr-5` sobre `08d7c3f`.
-- Ramas locales borradas: `feat/f2-campaigns`, `chore/f2-handoff`. `feat/f1-core` ya no existe en `origin`.
+- PR #5: FUSIONADO (squash `d419149`). Tag `pre-merge-pr-5` sobre `08d7c3f`; CI en verde (lint/typecheck/test/build/privacy, gitleaks y guard de revert).
+- Ramas locales borradas: `feat/f2-campaigns`, `chore/f2-handoff`, `feat/f2-sessions`. `feat/f1-core` ya no existe en `origin`.
 
 ## Qué está terminado
 
 - Fase 1 y Fase 2.1 fusionadas en `dev` (ver PR #1 y PR #3).
-- Fase 2.2 Sesiones implementada en `feat/f2-sessions`:
+- Fase 2.2 Sesiones fusionada en `dev` (PR #5, squash `d419149`):
   - Migración `20261109202758_f2_sessions_lifecycle`: `Session.status` (`DRAFT`/`PLAYED`/`CLOSED`, default `DRAFT`), `Session.notePath` nullable, índice `[campaignId, status]`.
   - Contratos compartidos `packages/shared/src/sessions.ts` (schemas, `SESSION_NEXT_STATUS`, `canTransitionSession`).
   - Backend `apps/api/src/modules/sessions`: CRUD por campaña, numeración `max+1`, `GET .../next-number`, `POST /api/v1/sessions/:id/transition` con `409 INVALID_TRANSITION`.
@@ -27,15 +27,17 @@
 ## Resuelto en esta sesión
 
 - PR #4 (docs de handoff) fusionado y ramas obsoletas limpiadas.
+- PR #5 fusionado (squash `d419149`) con CI en verde; `Squash merge SHA` rellenado en `docs/revert/PR-5.md`.
+- Layout local consolidado: repositorio y vault viven bajo un mismo directorio raíz. El vault sigue **fuera del repo** y no se versiona; su ruta se lee de `VAULT_PATH` en `.env`.
+- Los planes de revert usan rutas relativas a la raíz del repo (`backups/db/...`) en lugar de rutas absolutas de Windows.
+- Al mover el repo, las uniones de npm workspaces (`node_modules/@proyectodm/*`) apuntaban a la ruta vieja y rompían el typecheck: se regeneraron con `npm install`.
 - Decisión de diseño 2.2: el estado no se parchea; se usa un endpoint de transición con máquina de estados compartida. La numeración es siempre servidor (`max+1`) y un choque concurrente con el índice único devuelve `409 CONFLICT`.
 - `fromPrismaError` ahora acepta mensajes por módulo (antes tenía el texto de campañas incrustado).
 - La migración de Prisma reconstruye la tabla `Session` (SQLite no permite añadir la columna enum in place); copia todas las filas sin reescribirlas. Documentado en `docs/revert/PR-5.md`.
 
 ## Pasos siguientes en orden
 
-1. Revisar CI de PR #5. Si está en verde:
-   - `gh pr merge 5 --squash --delete-branch` (no hay PRs apilados sobre esta rama).
-   - Rellenar `Squash merge SHA` en `docs/revert/PR-5.md` y actualizar `PENDIENTES.md`/este checkpoint desde una rama `chore/f2.2-postmerge` creada desde `dev` (nunca commit directo a `dev`), con su PR corto.
+1. Fusionar el PR corto de `chore/f2.2-postmerge` (solo docs: SHA de fusión, backlog y checkpoint). Nunca commit directo a `dev`.
 2. Arrancar **Fase 2.3 Wiki de entidades + tags** desde `dev` actualizado:
    - `git switch dev; git pull --ff-only origin dev; git switch -c feat/f2-wiki; npm run db:backup -- --label pre-f2-wiki`.
    - `Entity` ya existe (`EntityType`, `summary`, `content`, unique `[campaignId, type, name]`); 2.3 debe añadir tags y CRUD/listado/detalle con búsqueda por nombre/tipo.
@@ -60,6 +62,7 @@
 - `git revert -m 1` NO funciona aquí: el repo usa squash merge.
 - PowerShell `Get-Content`/`Set-Content` convierte LF a CRLF y `-replace` opera por línea; preferir las herramientas `edit`/`write` y normalizar con Node si hace falta.
 - El bundle web está en ~604 kB; hay code-splitting por ruta, el aviso >500 kB es preexistente.
+- Si se mueve el repo de sitio, las uniones de `node_modules/@proyectodm/*` quedan apuntando a la ruta vieja: re-ejecutar `npm install` para regenerarlas antes de `typecheck`/`build`.
 
 ## Cómo verificar el estado en 30 segundos
 
