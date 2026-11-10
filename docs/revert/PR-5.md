@@ -6,9 +6,9 @@
 
 - Branch: `feat/f2-sessions`
 - Base: `dev`
-- Feature head SHA: `bdd2bac28f84986d8e574b13f742d137fab60c43`
+- Feature head SHA: `10e7cb6c7e3b70ec9db47d500d4b1543c2c743a7`
 - Pre-merge `dev`: `08d7c3f9e4bb9e140ed53545e44b9fe899d4cfc7` (tag `pre-merge-pr-5`)
-- Squash merge SHA (the squashed commit on `dev`): `PENDING (fill after merge)`
+- Squash merge SHA (the squashed commit on `dev`): `d419149590d9cc92f0e96030d041e4ab28a4b7b9`
 - Date: `2026-11-09`
 
 ## Database backup
@@ -26,7 +26,7 @@ single squashed commit, not a merge commit. Do NOT use `-m 1` (it fails with
 ```bash
 git switch dev
 git pull --ff-only origin dev
-git revert PENDING (fill after merge)
+git revert d419149590d9cc92f0e96030d041e4ab28a4b7b9
 git push origin dev
 ```
 
