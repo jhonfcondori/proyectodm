@@ -80,6 +80,13 @@ module.exports = {
       to: { path: '^apps/api/src/modules/campaigns/(?!index\\.ts$).+' },
     },
     {
+      name: 'no-cross-module-deep-import-api-sessions',
+      comment: 'API cross-module imports must go through the target module index.ts.',
+      severity: 'error',
+      from: { path: '^apps/api/src/', pathNot: '^apps/api/src/modules/sessions/' },
+      to: { path: '^apps/api/src/modules/sessions/(?!index\\.ts$).+' },
+    },
+    {
       name: 'no-cross-module-deep-import-web-health',
       comment: 'Web cross-module imports must go through the target module index.ts.',
       severity: 'error',
@@ -92,6 +99,13 @@ module.exports = {
       severity: 'error',
       from: { path: '^apps/web/src/', pathNot: '^apps/web/src/modules/campaigns/' },
       to: { path: '^apps/web/src/modules/campaigns/(?!index\\.ts$).+' },
+    },
+    {
+      name: 'no-cross-module-deep-import-web-sessions',
+      comment: 'Web cross-module imports must go through the target module index.ts.',
+      severity: 'error',
+      from: { path: '^apps/web/src/', pathNot: '^apps/web/src/modules/sessions/' },
+      to: { path: '^apps/web/src/modules/sessions/(?!index\\.ts$).+' },
     },
   ],
   options: {

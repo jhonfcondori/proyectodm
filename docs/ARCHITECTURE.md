@@ -65,7 +65,8 @@ The API is composed, not singleton-wired:
   `deps.prisma` is **optional** (`PrismaClient`), so health-only tests can build
   the app without a database.
 - Modules that need the database are mounted only when their dependency is
-  present: `/api/v1/health` is always mounted; `/api/v1/campaigns` is mounted
+  present: `/api/v1/health` is always mounted; `/api/v1/campaigns` and
+  `/api/v1/sessions` (plus the campaign-scoped session routes) are mounted
   only when `deps.prisma !== undefined`. When the dependency is missing the
   module is simply not registered (no route, no 500).
 - Repositories receive `PrismaClient` **by parameter** (first argument), never
@@ -87,7 +88,8 @@ The API is composed, not singleton-wired:
 
 | Data | Source of truth |
 | --- | --- |
-| Narrative notes, sessions, wiki | Obsidian vault (markdown) |
+| Narrative notes, wiki | Obsidian vault (markdown) |
+| Session metadata and lifecycle (number, status, played date, note link) | SQLite |
 | Structured state: combat, dice history, loot inventory | SQLite |
 | Search index | SQLite FTS5 (rebuilt from both) |
 
@@ -118,6 +120,25 @@ DB unique index would have forced the migration to dedupe existing rows (a
 data-mutating `UPDATE`) or fail on install. Application-level uniqueness keeps
 migrations additive and never rewrites user data. Do not add `@@unique([name])`
 without a separate expand/contract plan.
+
+### Decision: session lifecycle is forward-only
+
+Sessions carry a `SessionStatus` (`DRAFT -> PLAYED -> CLOSED`) and are numbered
+per campaign (`number`, unique with `campaignId`). Decisions:
+
+- Lifecycle changes use `POST /api/v1/sessions/:id/transition`, not a `PATCH`.
+  Only the next status is accepted; skips, backwards moves and no-ops return
+  `409 INVALID_TRANSITION` with `{ from, to }` details. The transition table is
+  shared (`SESSION_NEXT_STATUS`, `canTransitionSession`) so the UI renders only
+  valid actions.
+- `POST /campaigns/:campaignId/sessions` assigns `number = max(number) + 1`
+  server-side; clients cannot choose it. `GET .../sessions/next-number` exposes
+  the same calculation for the create-form preview. A concurrent create can hit
+  the unique index and surfaces as `409 CONFLICT`.
+- Moving to `PLAYED` stamps `playedAt` with the current time when it was empty;
+  an explicit date is never overwritten.
+- `notePath` is a nullable forward link to the vault note; the vault module
+  (phase 6) is the only writer. Narrative session notes stay in the vault.
 
 ## Obsidian integration
 

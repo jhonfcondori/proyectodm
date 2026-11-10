@@ -10,6 +10,12 @@ const CampaignsPage = lazy(() =>
 const CampaignDetailPage = lazy(() =>
   import('./modules/campaigns').then((module) => ({ default: module.CampaignDetailPage })),
 )
+const SessionsPage = lazy(() =>
+  import('./modules/sessions').then((module) => ({ default: module.SessionsPage })),
+)
+const SessionDetailPage = lazy(() =>
+  import('./modules/sessions').then((module) => ({ default: module.SessionDetailPage })),
+)
 const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })),
 )
@@ -40,6 +46,11 @@ export function App() {
             <Route path="/" element={<Navigate to="/campaigns" replace />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
             <Route path="/campaigns/:campaignId" element={<CampaignDetailPage />} />
+            <Route path="/campaigns/:campaignId/sessions" element={<SessionsPage />} />
+            <Route
+              path="/campaigns/:campaignId/sessions/:sessionId"
+              element={<SessionDetailPage />}
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
